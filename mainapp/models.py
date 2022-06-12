@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import DateTimeField
 
@@ -77,7 +79,7 @@ class Lesson(BaseModel):
         verbose_name_plural = 'уроки'
         ordering = ("course", "num")
 
-class CourseTeacher(BaseModel):
+class CoursesTeacher(BaseModel):
     courses = models.ManyToManyField(Course)
     name_first = models.CharField(max_length=128, verbose_name="Name")
     name_second = models.CharField(max_length=128, verbose_name="Surname")
@@ -85,3 +87,23 @@ class CourseTeacher(BaseModel):
 
     def __str__(self) -> str:
             return "{0:0>3} {1} {2}".format(self.pk, self.name_second, self.name_first)
+
+class CourseFeedback(BaseModel):
+    RATINGS = (
+        (5, '⭐⭐⭐⭐⭐'),
+        (4, '⭐⭐⭐⭐'),
+        (3, '⭐⭐⭐'),
+        (2, '⭐⭐'),
+        (1, '⭐'),
+    )
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курс')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Пользователь')
+    rating = models.SmallIntegerField(choices=RATINGS, default=5, verbose_name='Рейтинг')
+    feedback = models.TextField(verbose_name='Отзыв', default='Без отзыва')
+
+    class Meta:
+        verbose_name=''
+        verbose_name_plural=''
+
+    def __str__(self):
+        return f'Отзыв на {self.course} от {self.user}'
